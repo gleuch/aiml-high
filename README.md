@@ -1,7 +1,7 @@
 # aiml-high
 
 
-> AIML Interpreter written in node.js. Built on (aimlinterpreter)[https://www.npmjs.com/package/aimlinterpreter].
+> AIML Interpreter written in node.js. Built on [aimlinterpreter](https://www.npmjs.com/package/aimlinterpreter).
 >
 >aiml-high is a module that allows you to parse AIML files and to find the correct answer to a given message.
 
