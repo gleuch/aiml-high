@@ -39,8 +39,8 @@ var AIMLHigh = function(botAttributesParam){
             wildCardArray = [];
             var result = '';
             for(var i = 0; i < domArray.length; i++){
-                var nodes = cleanDom(domArray[i].childNodes);
-                result = findCorrectCategory(clientInput, nodes);
+                // var nodes = cleanDom(domArray[i].childNodes);
+                result = findCorrectCategory(clientInput, domArray[i].childNodes);
                 if(result){
                     break;
                 }
@@ -92,11 +92,11 @@ var cleanDom = function(childNodes){
     }
 
     // traverse through whole tree by recursive calls
-    for(var j = 0; j < childNodes.length; j++){
-        if(childNodes[j].hasOwnProperty('childNodes')){
-            childNodes[j].childNodes = cleanDom(childNodes[j].childNodes);
-        }
-    }
+    // for(var j = 0; j < childNodes.length; j++){
+    //     if(childNodes[j].hasOwnProperty('childNodes')){
+    //         childNodes[j].childNodes = cleanDom(childNodes[j].childNodes);
+    //     }
+    // }
 
     return childNodes;
 };
@@ -196,10 +196,8 @@ var findCorrectCategory = function(clientInput, domCategories){
             else if(childNodesOfTemplate[i].tagName === 'srai'){
                 //take pattern text of srai node to get answer of another category
                 var sraiText = '' + findFinalTextInTemplateNode(childNodesOfTemplate[i].childNodes);
-                sraiText = sraiText.toUpperCase();
-                var referredPatternText = sraiText;
                 //call findCorrectCategory again to find the category that belongs to the srai node
-                var text = findCorrectCategory(referredPatternText, domCategories);
+                var text = findCorrectCategory(sraiText, domCategories);
                 return text;
             }
             else if(childNodesOfTemplate[i].tagName === 'li'){
@@ -291,12 +289,10 @@ var findCorrectCategory = function(clientInput, domCategories){
                     storedVariableValues[nameAttribute] = innerNodes[i].childNodes[0].nodeValue;
                 }
 
-                //console.log('SET->', nameAttribute, '=', storedVariableValues[nameAttribute])
-
                 //If this set tag is a think tag's child
                 if(previousThinkTag){
-                    previousThinkTag=false;
-                    text= text + '';
+                    previousThinkTag = false;
+                    text = text + '';
                 }else{
                     text = text + resolveSpecialNodes(innerNodes[i].childNodes);
                 }
@@ -305,7 +301,7 @@ var findCorrectCategory = function(clientInput, domCategories){
                 text = text + '\n';
             }
             else if(innerNodes[i].tagName === 'think'){
-                previousThinkTag=true;
+                previousThinkTag = true;
                 text = text + resolveSpecialNodes(innerNodes[i].childNodes);
             }
             else if(innerNodes[i].tagName === 'sr'){
@@ -333,10 +329,8 @@ var findCorrectCategory = function(clientInput, domCategories){
             else if(innerNodes[i].tagName === 'srai'){
                 //take pattern text of srai node to get answer of another category
                 var sraiText = '' + findFinalTextInTemplateNode(innerNodes[i].childNodes);
-                sraiText = sraiText.toUpperCase();
-                var referredPatternText = sraiText;
                 //call findCorrectCategory again to find the category that belongs to the srai node
-                text = text + findCorrectCategory(referredPatternText, domCategories);
+                text = text + findCorrectCategory(sraiText, domCategories);
             }
             else if(innerNodes[i].tagName === 'condition') {
                 // condition tag specification: list condition tag
