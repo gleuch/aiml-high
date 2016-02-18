@@ -33,7 +33,10 @@ var aimlHigh = function(botAttributesParam){
     };
 
     this.loadFromString = function(str) {
-        var dom = new DOMParser().parseFromString(str);
+        if(str === undefined){
+          return;
+        }
+        var dom = new DOMParser().parseFromString(str.toString());
         domArray.push(dom);
         isAIMLFileLoaded = true;
     };
@@ -44,8 +47,8 @@ var aimlHigh = function(botAttributesParam){
             wildCardArray = [];
             var result = '';
             for(var i = 0; i < domArray.length; i++){
-                // var nodes = cleanDom(domArray[i].childNodes);
-                result = findCorrectCategory(clientInput, domArray[i].childNodes);
+                var nodes = cleanDom(domArray[i].childNodes);
+                result = findCorrectCategory(clientInput, nodes);
                 if(result){
                     break;
                 }
@@ -91,21 +94,21 @@ var cleanStringFormatCharacters = function(str){
 
 var cleanDom = function(childNodes){
     for(var i = 0; i < childNodes.length; i++){
-        if(childNodes[i].hasOwnProperty('text') & typeof(childNodes[i].nodeValue) === 'string'){
+        if(childNodes[i].hasOwnProperty('nodeValue') & typeof(childNodes[i].nodeValue) === 'string'){
 
             // remove all nodes of type 'text' when they just contain '\r\n'. This indicates line break in the AIML file
             if(childNodes[i].nodeValue.match(/^\s*\r\n\s*$/gi)){
-                childNodes.splice(i, 1);
+                childNodes[i].parentNode.removeChild(childNodes[i]);
             }
         }
     }
 
     // traverse through whole tree by recursive calls
-    // for(var j = 0; j < childNodes.length; j++){
-    //     if(childNodes[j].hasOwnProperty('childNodes')){
-    //         childNodes[j].childNodes = cleanDom(childNodes[j].childNodes);
-    //     }
-    // }
+    for(var j = 0; j < childNodes.length; j++){
+        if(childNodes[j].hasOwnProperty('childNodes')){
+            childNodes[j].childNodes = cleanDom(childNodes[j].childNodes);
+        }
+    }
 
     return childNodes;
 };
