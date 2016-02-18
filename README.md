@@ -1,15 +1,17 @@
 # aiml-high
 
+[![npm version](https://badge.fury.io/js/aiml-high.svg)](https://badge.fury.io/js/aiml-high)
+
 
 > AIML Interpreter written in node.js. Built on [aimlinterpreter](https://www.npmjs.com/package/aimlinterpreter).
 >
 >aiml-high is a module that allows you to parse AIML files and to find the correct answer to a given message.
 
+
 ## Installation
 
-__(NOTE: NOT YET PUSHED TO NPM)__
-
 `npm install aiml-high`
+
 
 ## Dependencies
 
@@ -18,6 +20,7 @@ fs
 xmldom
 ```
 
+
 ## Description
 
 With `new aimlHigh(botAttributes)` one can create a new interpreter object. `botAttributes` is an JSON-Object that can contain attributes of the bot one wants to use in AIML files, e.g. `{name: "Bot", age:"42"}`.
@@ -25,6 +28,7 @@ With `new aimlHigh(botAttributes)` one can create a new interpreter object. `bot
 This object has a function called `loadFiles(fileArray)` which receives an array of AIML files. This function loads the AIML file into memory.
 
 Furthermore, the object has a function called `findAnswer(clientInput, cb)` which receives a message and a callback. The callback is called when an answer was found. The callback of `findAnswer` should look like this: `callback(result, wildCardArray, input)`. `Result` is the answer from the AIML file and `wildCardArray` stores the values of all wildcardInputs passed previously from the client. The original input which triggered the answer is given back via `input`.	
+
 
 ##### Example
 
@@ -65,3 +69,9 @@ interpreter.findAnswer('What is my name?', callback);
 <condition><li name="<i>NAME</i>" value="<i>VALUE</i>"><srai><i>PATTERN TEXT</i></srai></li><li name="<i>NAME</i>" value="<i>VALUE</i>"><i>TEXT</i></li></condition>
 <condition name="<i>NAME</i>"><li value="<i>VALUE</i>"><srai><i>PATTERN TEXT</i></srai></li><li value="<i>VALUE</i>"><i>TEXT</i></li></condition>
 ```
+
+
+## Copyright & License
+
+Copyright 2016 [Greg Leuch](https://gleu.ch) & [betaworks](https://betaworks.com).
+Released under [MIT License](https://opensource.org/licenses/MIT).
