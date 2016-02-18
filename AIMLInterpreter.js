@@ -1,4 +1,4 @@
-DomJS = require("dom-js").DomJS;
+DOMParser = require('xmldom').DOMParser;
 fs = require('fs');
 
 var storedVariableValues = {};
@@ -8,61 +8,39 @@ var lastWildCardValue = '';
 var wildCardArray = [];
 
 var domArray = [];
-var domIndex = 0;
 
-var isAIMLFileLoadingStarted = false;
 var isAIMLFileLoaded = false;
 
 var previousAnswer = '';
 var previousThinkTag = false;
 
 //botAttributes contain things like name, age, master, gender...
-var AIMLInterpreter = function(botAttributesParam){
+var AIMLHigh = function(botAttributesParam){
     var self = this;
     botAttributes = botAttributesParam;
 
-    this.loadAIMLFilesIntoArray = function(fileArray){
-        isAIMLFileLoadingStarted = true;
-        var fileIndex = 0;
-        var readAIMLFile = function(file){
+    this.loadFiles = function(files){
+        files.forEach(function(file){
             fs.readFile(file, 'utf8', function (err,data) {
                 if (err) {
                     return console.log(err);
                 }
 
-                fileIndex++;
-
-                new DomJS().parse(data, function(err, dom) {
-                    var topCategories, topics;
-                    if (err) {
-                        //            return cb(err);
-                    }
-                    if (dom.name === !'aiml') {
-                        //            return cb('Unsupported file');
-                    }
-                    domArray[domIndex] = dom;
-                    domIndex++;
-                    if(fileIndex < fileArray.length){
-                        readAIMLFile(fileArray[fileIndex]);
-                    }
-                    else{
-                        console.log('AIML file is loaded!');
-                        isAIMLFileLoaded = true;
-                    }
-                });
+                var dom = new DOMParser().parseFromString(data);
+                domArray.push(dom);
+                isAIMLFileLoaded = true;
             });
-        }
-        readAIMLFile(fileArray[fileIndex]);
+        });
     };
 
-    this.findAnswerInLoadedAIMLFiles = function(clientInput, cb){
+    this.findAnswer = function(clientInput, cb){
         //check if all AIML files have been loaded. If not, call this method again after a delay
         if(isAIMLFileLoaded){
             wildCardArray = [];
             var result = '';
             for(var i = 0; i < domArray.length; i++){
-                cleanDom(domArray[i].children);
-                result = findCorrectCategory(clientInput, domArray[i].children);
+                var nodes = cleanDom(domArray[i].childNodes);
+                result = findCorrectCategory(clientInput, nodes);
                 if(result){
                     break;
                 }
@@ -75,19 +53,18 @@ var AIMLInterpreter = function(botAttributesParam){
             cb(result, wildCardArray, clientInput);
         }
         else{
-            var findAnswerInLoadedAIMLFilesWrapper = function(clientInput, cb){
+            var findAnswerWrapper = function(clientInput, cb){
                 return function(){
-                    self.findAnswerInLoadedAIMLFiles(clientInput, cb);
+                    self.findAnswer(clientInput, cb);
                 };
             };
 
-            setTimeout(findAnswerInLoadedAIMLFilesWrapper(clientInput, cb), 1000);
+            setTimeout(findAnswerWrapper(clientInput, cb), 1000);
         }
     };
     //restart the DOM in order to load a new AIML File
     this.restartDom = function(){
-        domArray=[];
-        domIndex=0;
+        domArray = [];
     };
 };
 
@@ -105,42 +82,48 @@ var cleanStringFormatCharacters = function(str){
 
 var cleanDom = function(childNodes){
     for(var i = 0; i < childNodes.length; i++){
-        if(childNodes[i].hasOwnProperty('text') & typeof(childNodes[i].text) === 'string'){
+        if(childNodes[i].hasOwnProperty('text') & typeof(childNodes[i].nodeValue) === 'string'){
 
             // remove all nodes of type 'text' when they just contain '\r\n'. This indicates line break in the AIML file
-            if(childNodes[i].text.match(/^\s*\r\n\s*$/gi)){
+            if(childNodes[i].nodeValue.match(/^\s*\r\n\s*$/gi)){
                 childNodes.splice(i, 1);
             }
         }
     }
 
-
     // traverse through whole tree by recursive calls
     for(var j = 0; j < childNodes.length; j++){
-        if(childNodes[j].hasOwnProperty('children')){
-            cleanDom(childNodes[j].children);
+        if(childNodes[j].hasOwnProperty('childNodes')){
+            childNodes[j].childNodes = cleanDom(childNodes[j].childNodes);
         }
     }
+
+    return childNodes;
 };
 
 var findCorrectCategory = function(clientInput, domCategories){
     //indexOfSetTagAmountWithWildCard indicates how many sets with wildcard occur so that those sets store the correct wildcard value
     var indexOfSetTagAmountWithWildCard = 0;
 
-    var  travereseThroughDomToFindMatchingPattern= function(categories){
+    var travereseThroughDomToFindMatchingPattern = function(categories){
         for(var i = 0; i < categories.length; i++){
-            if(categories[i].name === 'category'){
+            // sort past <aiml> document tag
+            if(categories[i].tagName === 'aiml'){
+              return travereseThroughDomToFindMatchingPattern(categories[i].childNodes);
+            }
+            else if(categories[i].tagName === 'category'){
                 //traverse through the dom
                 //text gets the value of the current pattern node
-                var text = travereseThroughDomToFindMatchingPattern(categories[i].children);
+                var text = travereseThroughDomToFindMatchingPattern(categories[i].childNodes);
+
                 //check if the input of the user matches the pattern text
                 var matches = checkIfMessageMatchesPattern(clientInput, text);
                 if(matches){
                     //check if a 'that' tag is existing. If yes, check if the text of the that tag matches the previous given answer.
                     //If it does not match, continue the traversion through the AIML file
-                    var isMatchingThat = checkForThatMatching(categories[i].children);
+                    var isMatchingThat = checkForThatMatching(categories[i].childNodes);
                     if(isMatchingThat){
-                        var text = findFinalTextInTemplateNode(categories[i].children);
+                        var text = findFinalTextInTemplateNode(categories[i].childNodes);
                         if(text){
                             return text;
                         }
@@ -148,8 +131,8 @@ var findCorrectCategory = function(clientInput, domCategories){
                     }
                 }
             }
-            else if(categories[i].name === 'pattern'){
-                var text = resolveChildNodesInPatternNode(categories[i].children);
+            else if(categories[i].tagName === 'pattern'){
+                var text = resolveChildNodesInPatternNode(categories[i].childNodes);
                 return text;
             }
         }
@@ -157,9 +140,9 @@ var findCorrectCategory = function(clientInput, domCategories){
 
     var checkForThatMatching = function(categoryChildNodes){
         for(var i = 0; i < categoryChildNodes.length; i++){
-            if(categoryChildNodes[i].name === 'that'){
+            if(categoryChildNodes[i].tagName === 'that'){
                 //if the previous answer of the bot does not match the that-tag text, then return undefined!
-                if(categoryChildNodes[i].children[0].text != previousAnswer){
+                if(categoryChildNodes[i].childNodes[0].nodeValue != previousAnswer){
                     return false;
                 }
                 else{
@@ -175,17 +158,17 @@ var findCorrectCategory = function(clientInput, domCategories){
         var text = '';
 
         for(var i = 0; i < patternChildNodes.length; i++){
-            if(patternChildNodes[i].name === 'bot'){
-                text = text + botAttributes[patternChildNodes[i].attributes.name];
+            if(patternChildNodes[i].tagName === 'bot'){
+                text = text + botAttributes[patternChildNodes[i].getAttribute('name')];
             }
-            else if(patternChildNodes[i].name === 'get'){
-                text = text + storedVariableValues[patternChildNodes[i].attributes.name];
+            else if(patternChildNodes[i].tagName === 'get'){
+                text = text + storedVariableValues[patternChildNodes[i].getAttribute('name')];
             }
-            else if(patternChildNodes[i].name === 'set'){
-                text = text + patternChildNodes[i].children[0].text;
+            else if(patternChildNodes[i].tagName === 'set'){
+                text = text + patternChildNodes[i].childNodes[0].nodeValue;
             }
             else{
-                text = text + patternChildNodes[i].text;
+                text = text + patternChildNodes[i].nodeValue;
             }
         }
 
@@ -197,67 +180,66 @@ var findCorrectCategory = function(clientInput, domCategories){
 
         //traverse through template nodes until final text is found
         //return it then to very beginning
-       
         for(var i = 0; i < childNodesOfTemplate.length; i++){
-            if(childNodesOfTemplate[i].name === 'template'){
+            if(childNodesOfTemplate[i].tagName === 'template'){
                 //traverse as long through the dom until final text was found
                 //final text -> text after special nodes (bot, get, set,...) were resolved
-                return findFinalTextInTemplateNode(childNodesOfTemplate[i].children);
+                return findFinalTextInTemplateNode(childNodesOfTemplate[i].childNodes);
             }
-            else if(childNodesOfTemplate[i].name === 'condition'){
+            else if(childNodesOfTemplate[i].tagName === 'condition'){
                 return resolveSpecialNodes(childNodesOfTemplate);
             }
-            else if(childNodesOfTemplate[i].name === 'random'){
+            else if(childNodesOfTemplate[i].tagName === 'random'){
                 //if random node was found, its children are 'li' nodes.
                 return resolveSpecialNodes(childNodesOfTemplate);
             }
-            else if(childNodesOfTemplate[i].name === 'srai'){
+            else if(childNodesOfTemplate[i].tagName === 'srai'){
                 //take pattern text of srai node to get answer of another category
-                var sraiText = '' + findFinalTextInTemplateNode(childNodesOfTemplate[i].children);
+                var sraiText = '' + findFinalTextInTemplateNode(childNodesOfTemplate[i].childNodes);
                 sraiText = sraiText.toUpperCase();
                 var referredPatternText = sraiText;
                 //call findCorrectCategory again to find the category that belongs to the srai node
                 var text = findCorrectCategory(referredPatternText, domCategories);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'li'){
-                return findFinalTextInTemplateNode(childNodesOfTemplate[i].children);
+            else if(childNodesOfTemplate[i].tagName === 'li'){
+                return findFinalTextInTemplateNode(childNodesOfTemplate[i].childNodes);
             }
-            else if(childNodesOfTemplate[i].name === 'br'){
+            else if(childNodesOfTemplate[i].tagName === 'br'){
                 //br elements are used for putting '\n' into the text
                 return resolveSpecialNodes(childNodesOfTemplate);
             }
-            else if(childNodesOfTemplate[i].name === 'pattern'){
+            else if(childNodesOfTemplate[i].tagName === 'pattern'){
                 //(here it is already checked that this is the right pattern that matches the user input)
                 //make use of the functions of the special nodes - bot, set, get...
-                resolveSpecialNodes(childNodesOfTemplate[i].children);
+                resolveSpecialNodes(childNodesOfTemplate[i].childNodes);
                 continue;
             }
-            else if(childNodesOfTemplate[i].name === 'think'){
+            else if(childNodesOfTemplate[i].tagName === 'think'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'bot'){
+            else if(childNodesOfTemplate[i].tagName === 'bot'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'set'){
+            else if(childNodesOfTemplate[i].tagName === 'set'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'get'){
+            else if(childNodesOfTemplate[i].tagName === 'get'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'sr'){
+            else if(childNodesOfTemplate[i].tagName === 'sr'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'star'){
+            else if(childNodesOfTemplate[i].tagName === 'star'){
                 text = resolveSpecialNodes(childNodesOfTemplate);
                 return text;
             }
-            else if(childNodesOfTemplate[i].name === 'that'){
+            else if(childNodesOfTemplate[i].tagName === 'that'){
 
             }
             else{
@@ -276,60 +258,62 @@ var findCorrectCategory = function(clientInput, domCategories){
         var text = '';
         //concatenate string of all node children - normal text, bot tags, get tags, set tags...
         for(var i = 0; i < innerNodes.length; i++){
-
-            if(innerNodes[i].name === 'bot'){
+            if(innerNodes[i].tagName === 'bot'){
                 //replace bot tags by the belonging bot attribute value
-                text = text + botAttributes[innerNodes[i].attributes.name];
+                text = text + botAttributes[innerNodes[i].getAttribute('name')];
             }
-            else if(innerNodes[i].name === 'get'){
+            else if(innerNodes[i].tagName === 'get'){
                 //replace get tag by belonging variable value
-                var getAux = storedVariableValues[innerNodes[i].attributes.name];
+                var getAux = storedVariableValues[innerNodes[i].getAttribute('name')];
                 if(getAux === undefined){
                     text = text + '';
                 }else{
                     text = text + getAux;
                 }
             }
-            else if(innerNodes[i].name === 'set'){
+            else if(innerNodes[i].tagName === 'set'){
                 //store value of set tag text into variable (variable name = attribute of set tag)
                 //replace than set tag by the text value
                 var aux='';
-                if(innerNodes[i].children[0].name === 'star'){
-                    aux = resolveSpecialNodes(innerNodes[i].children);
-                    storedVariableValues[innerNodes[i].attributes.name] = aux;
+                var nameAttribute = innerNodes[i].getAttribute('name');
+                if(innerNodes[i].childNodes[0].tagName === 'star'){
+                    aux = resolveSpecialNodes(innerNodes[i].childNodes);
+                    storedVariableValues[nameAttribute] = aux;
                     if(!previousThinkTag){
                         text = text + aux;
                     }
                 }
-                else if(innerNodes[i].children[0].text === '*'){
+                else if(innerNodes[i].childNodes[0].nodeValue === '*'){
                     //the first set-Tag with wildCard gets the first wildCardValue, the second set-Tag with wildCard gets the second wildCardValue etc.
-                    storedVariableValues[innerNodes[i].attributes.name] = wildCardArray[indexOfSetTagAmountWithWildCard];
+                    storedVariableValues[nameAttribute] = wildCardArray[indexOfSetTagAmountWithWildCard];
                     indexOfSetTagAmountWithWildCard++;
                 }else{
-                    storedVariableValues[innerNodes[i].attributes.name] = innerNodes[i].children[0].text;
+                    storedVariableValues[nameAttribute] = innerNodes[i].childNodes[0].nodeValue;
                 }
+
+                //console.log('SET->', nameAttribute, '=', storedVariableValues[nameAttribute])
 
                 //If this set tag is a think tag's child
                 if(previousThinkTag){
                     previousThinkTag=false;
                     text= text + '';
                 }else{
-                    text = text + resolveSpecialNodes(innerNodes[i].children);
+                    text = text + resolveSpecialNodes(innerNodes[i].childNodes);
                 }
             }
-            else if(innerNodes[i].name === 'br'){
+            else if(innerNodes[i].tagName === 'br'){
                 text = text + '\n';
             }
-            else if(innerNodes[i].name === 'think'){
+            else if(innerNodes[i].tagName === 'think'){
                 previousThinkTag=true;
-                text = text + resolveSpecialNodes(innerNodes[i].children);
+                text = text + resolveSpecialNodes(innerNodes[i].childNodes);
             }
-            else if(innerNodes[i].name === 'sr'){
+            else if(innerNodes[i].tagName === 'sr'){
                 var result;
 
                 //for-loop to go through all loaded AIML files
                 for(var j = 0; j < domArray.length; j++){
-                    result = findCorrectCategory(lastWildCardValue, domArray[j].children);
+                    result = findCorrectCategory(lastWildCardValue, domArray[j].childNodes);
                     //if in one of the dom trees a matching pattern was found, exit this inner loop
                     if(result){
                         text = text + result;
@@ -337,55 +321,55 @@ var findCorrectCategory = function(clientInput, domCategories){
                     }
                 }
             }
-            else if(innerNodes[i].name === 'random'){
+            else if(innerNodes[i].tagName === 'random'){
                 //Get a random number and find the li tag chosen
-                var randomNumber = Math.floor(Math.random() * (innerNodes[i].children.length));
-                text = text + findFinalTextInTemplateNode([innerNodes[i].children[randomNumber]]);
+                var randomNumber = Math.floor(Math.random() * (innerNodes[i].childNodes.length));
+                text = text + findFinalTextInTemplateNode([innerNodes[i].childNodes[randomNumber]]);
             ;
             }
-            else if(innerNodes[i].name === 'star'){
+            else if(innerNodes[i].tagName === 'star'){
                 text = text + lastWildCardValue;
             }
-            else if(innerNodes[i].name === 'srai'){
+            else if(innerNodes[i].tagName === 'srai'){
                 //take pattern text of srai node to get answer of another category
-                var sraiText = '' + findFinalTextInTemplateNode(innerNodes[i].children);
+                var sraiText = '' + findFinalTextInTemplateNode(innerNodes[i].childNodes);
                 sraiText = sraiText.toUpperCase();
                 var referredPatternText = sraiText;
                 //call findCorrectCategory again to find the category that belongs to the srai node
                 text = text + findCorrectCategory(referredPatternText, domCategories);
             }
-            else if(innerNodes[i].name === 'condition') {                
+            else if(innerNodes[i].tagName === 'condition') {
                 // condition tag specification: list condition tag
-                if(innerNodes[i].attributes.name === undefined){
-                    if(innerNodes[i].children === undefined){
+                if(!innerNodes[i].hasAttribute('name')){
+                    if(innerNodes[i].childNodes.length == 0){
                         return undefined;
                     }
                     var child;
-                    for(var c in innerNodes[i].children){
-                        child = innerNodes[i].children[c];
-                        if(child.name === 'li'){
-                            if(child.attributes.value == undefined 
-                                || storedVariableValues[child.attributes.name] === child.attributes.value.toUpperCase()){
-                                return findFinalTextInTemplateNode(child.children);
+                    for(var c in innerNodes[i].childNodes){
+                        child = innerNodes[i].childNodes[c];
+                        if(child.tagName === 'li'){
+                            if(!child.hasAttribute('value')
+                                || storedVariableValues[child.getAttribute('name')] === child.getAttribute('value')){
+                                return findFinalTextInTemplateNode(child.childNodes);
                             }
                         }
                     }
-                } 
+                }
                 // condition tag specification: multi condition tag
-                else if(innerNodes[i].attributes.value !== undefined){         
-                    if (storedVariableValues[innerNodes[i].attributes.name] === innerNodes[i].attributes.value.toUpperCase()) {
-                        text = text + resolveSpecialNodes(innerNodes[i].children);
+                else if(innerNodes[i].hasAttribute('value')){
+                    if (storedVariableValues[innerNodes[i].getAttribute('name')] === innerNodes[i].getAttribute('value')) {
+                        text = text + resolveSpecialNodes(innerNodes[i].childNodes);
                     }
                 }
                 // condition tag specification: single name list condition tags
-                else if(innerNodes[i].children !== undefined){
+                else if(innerNodes[i].childNodes.length > 0){
                     var child;
-                    for(var c in innerNodes[i].children){
-                        child = innerNodes[i].children[c];
-                        if(child.name === 'li'){
-                            if(child.attributes.value === undefined 
-                                || storedVariableValues[innerNodes[i].attributes.name] === child.attributes.value.toUpperCase()){
-                                return resolveSpecialNodes(child.children);
+                    for(var c in innerNodes[i].childNodes){
+                        child = innerNodes[i].childNodes[c];
+                        if(child.tagName === 'li'){
+                            if(!child.hasAttribute('value')
+                                || storedVariableValues[innerNodes[i].getAttribute('name')] === child.getAttribute('value')){
+                                return resolveSpecialNodes(child.childNodes);
                             }
                         }
                     }
@@ -393,9 +377,9 @@ var findCorrectCategory = function(clientInput, domCategories){
                     return undefined;
                 }
             }
-            else if(innerNodes[i].name === undefined){
+            else if(innerNodes[i].tagName === undefined){
                 //normal text (no special tag)
-                text = text + innerNodes[i].text;
+                text = text + innerNodes[i].nodeValue;
             }
         }
 
@@ -527,5 +511,5 @@ var getWildCardValue = function(userInput, patternText){
     return wildCardArray;
 }
 
-module.exports = AIMLInterpreter;
+module.exports = AIMLHigh;
 

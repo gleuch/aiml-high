@@ -2,23 +2,23 @@
   "READ ME": "README.md",
   "_args": [
     [
-      "aimlinterpreter",
+      "aiml-high",
       "/home/sergio/Documentos/PFG/SERGIOBOT"
     ]
   ],
-  "_from": "aimlinterpreter@*",
-  "_id": "aimlinterpreter@0.1.7",
+  "_from": "aiml-high@*",
+  "_id": "aiml-high@0.0.1",
   "_inCache": true,
-  "_location": "/aimlinterpreter",
+  "_location": "/aiml-high",
   "_npmUser": {
-    "email": "bennyra92@gmail.com",
-    "name": "b3nra"
+    "email": "contact@gleu.ch",
+    "name": "gleuch"
   },
   "_npmVersion": "1.4.28",
   "_phantomChildren": {},
   "_requested": {
-    "name": "aimlinterpreter",
-    "raw": "aimlinterpreter",
+    "name": "aiml-high",
+    "raw": "aiml-high",
     "rawSpec": "",
     "scope": null,
     "spec": "*",
@@ -27,29 +27,24 @@
   "_requiredBy": [
     "#USER"
   ],
-  "_resolved": "https://registry.npmjs.org/aimlinterpreter/-/aimlinterpreter-0.1.7.tgz",
-  "_shasum": "988c1b6b135a8099b3d1144832ad89691d1b7cf6",
-  "_shrinkwrap": null,
-  "_spec": "aimlinterpreter",
-  "_where": "/home/sergio/Documentos/PFG/SERGIOBOT",
   "author": {
-    "name": "B3nRa"
+    "name": "gleuch"
   },
   "bugs": {
-    "url": "https://github.com/raethlein/AIML.js/issues"
+    "url": "https://github.com/gleuch/aiml-high/issues"
   },
   "dependencies": {
-    "dom-js": "~0.0.9"
+    "xmldom": "~0.1.0"
   },
   "description": "Module to interpret AIML files in node.js",
   "devDependencies": {},
   "directories": {},
   "dist": {
-    "shasum": "988c1b6b135a8099b3d1144832ad89691d1b7cf6",
-    "tarball": "http://registry.npmjs.org/aimlinterpreter/-/aimlinterpreter-0.1.7.tgz"
+    "shasum": "",
+    "tarball": ""
   },
-  "gitHead": "1497b828dfa61cfc8555b935ca40f9dad60c0125",
-  "homepage": "https://github.com/raethlein/AIML.js",
+  "gitHead": "",
+  "homepage": "https://github.com/gleuch/aiml-high",
   "installable": true,
   "keywords": [
     "ai",
@@ -58,21 +53,21 @@
     "interpreter"
   ],
   "license": "BSD",
-  "main": "AIMLInterpreter.js",
+  "main": "aiml-high",
   "maintainers": [
     {
-      "name": "Benjamin Raethlein",
-      "email": "benjamin.raethlein@gmail.com"
+      "name": "Greg Leuch",
+      "email": "contact@gleu.ch"
     }
   ],
-  "name": "aimlinterpreter",
+  "name": "aiml-high",
   "optionalDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/raethlein/AIML.js.git"
+    "url": "https://github.com/gleuch/aiml-high.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.1.7"
+  "version": "0.0.1"
 }
