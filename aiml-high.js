@@ -10,6 +10,8 @@ var wildCardArray = [];
 var domArray = [];
 
 var isAIMLFileLoaded = false;
+var findAnswerAttempts = 0;
+var maxFindAnswerAttempts = 10;
 
 var previousAnswer = '';
 var previousThinkTag = false;
@@ -55,8 +57,9 @@ var aimlHigh = function(botAttributesParam){
             }
             cb(result, wildCardArray, clientInput);
         }
-        else{
+        else if(findAnswerAttempts < maxFindAnswerAttempts){
             var findAnswerWrapper = function(clientInput, cb){
+                findAnswerAttempts++;
                 return function(){
                     self.findAnswer(clientInput, cb);
                 };
@@ -64,14 +67,17 @@ var aimlHigh = function(botAttributesParam){
 
             setTimeout(findAnswerWrapper(clientInput, cb), 1000);
         }
+        else {
+          console.log('Too many findAnswer attempts.', findAnswerAttempts);
+          cb(undefined, wildCardArray, clientInput);
+        }
     };
     //restart the DOM in order to load a new AIML File
     this.restartDom = function(){
         domArray = [];
+        findAnswerAttempts = 0;
     };
 };
-
-
 
 
 // remove string control characters (like line-breaks '\r\n', leading / trailing spaces etc.)

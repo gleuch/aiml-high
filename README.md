@@ -25,7 +25,7 @@ xmldom
 
 With `new aimlHigh(botAttributes)` one can create a new interpreter object. `botAttributes` is an JSON-Object that can contain attributes of the bot one wants to use in AIML files, e.g. `{name: "Bot", age:"42"}`.
 
-This object has a function called `loadFiles(fileArray)` which receives an array of AIML files. This function loads the AIML file into memory. There is also a  `loadString(stringContent)` that can also be passed if AIML file has been saved into a string.
+This object has a function called `loadFiles(fileArray)` which receives an array of AIML files. This function loads the AIML file into memory. There is also a  `loadFromString(stringContent)` that can also be passed if AIML file has been saved into a string.
 
 Furthermore, the object has a function called `findAnswer(clientInput, cb)` which receives a message and a callback. The callback is called when an answer was found. The callback of `findAnswer` should look like this: `callback(result, wildCardArray, input)`. `Result` is the answer from the AIML file and `wildCardArray` stores the values of all wildcardInputs passed previously from the client. The original input which triggered the answer is given back via `input`.	
 
