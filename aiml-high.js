@@ -25,12 +25,15 @@ var aimlHigh = function(botAttributesParam){
                 if (err) {
                     return console.log(err);
                 }
-
-                var dom = new DOMParser().parseFromString(data);
-                domArray.push(dom);
-                isAIMLFileLoaded = true;
+                self.loadFromString(data);
             });
         });
+    };
+
+    this.loadFromString = function(str) {
+        var dom = new DOMParser().parseFromString(str);
+        domArray.push(dom);
+        isAIMLFileLoaded = true;
     };
 
     this.findAnswer = function(clientInput, cb){
