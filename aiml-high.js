@@ -85,7 +85,7 @@ var aimlHigh = function(botAttributesParam){
 
 // remove string control characters (like line-breaks '\r\n', leading / trailing spaces etc.)
 var cleanStringFormatCharacters = function(str){
-    var cleanedStr = str.replace(/\r\n/gi, '');
+    var cleanedStr = str.replace(/(\r)?\n/gi, '');
     cleanedStr = cleanedStr.replace(/^\s*/, '');
     cleanedStr = cleanedStr.replace(/\s*$/,'');
 
@@ -97,7 +97,7 @@ var cleanDom = function(childNodes){
         if(childNodes[i].hasOwnProperty('nodeValue') & typeof(childNodes[i].nodeValue) === 'string'){
 
             // remove all nodes of type 'text' when they just contain '\r\n'. This indicates line break in the AIML file
-            if(childNodes[i].nodeValue.match(/^\s*\r\n\s*$/gi)){
+            if(childNodes[i].nodeValue.match(/^\s*(\r)?\n\s*$/gi)){
                 childNodes[i].parentNode.removeChild(childNodes[i]);
             }
         }
