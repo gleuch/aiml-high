@@ -1,6 +1,6 @@
 {
   "name": "aiml-high",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Interpret AIML files using node.",
   "main": "aiml-high.js",
   "dependencies": {
