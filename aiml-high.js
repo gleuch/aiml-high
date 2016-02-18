@@ -15,7 +15,7 @@ var previousAnswer = '';
 var previousThinkTag = false;
 
 //botAttributes contain things like name, age, master, gender...
-var AIMLHigh = function(botAttributesParam){
+var aimlHigh = function(botAttributesParam){
     var self = this;
     botAttributes = botAttributesParam;
 
@@ -505,5 +505,4 @@ var getWildCardValue = function(userInput, patternText){
     return wildCardArray;
 }
 
-module.exports = AIMLHigh;
-
+module.exports = aimlHigh;

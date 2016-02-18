@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <aiml>
-    
     <category><pattern>WHAT IS YOUR NAME</pattern><template>My name is <bot name='name'/>.</template></category>
     <category><pattern>MY NAME IS <set name='clientName'>*</set></pattern><template>Hey <get name='clientName'/>!</template></category>
     <category><pattern>MY NAME IS <set name='clientName'>*</set></pattern><template><get name='clientName'/> <random><li>Hey</li><li>Hi</li><li>Hello</li></random> !</template></category>
     <category><pattern>WHAT IS MY NAME</pattern><template>Your name is <get name='clientName'/></template></category>
     <category><pattern>WHO ARE YOU</pattern><template><srai>WHAT IS YOUR NAME</srai></template></category>
     <category><pattern>GIVE ME A LETTER</pattern><template><random><li>A</li><li>B</li><li>C</li></random></template></category>
-	<category><pattern>TEST SRAI IN RANDOM</pattern><template><random><li><srai>WHAT IS YOUR NAME</srai></li><li><srai>WHAT IS MY NAME</srai></li></random></template></category>
-	<category><pattern>TEST WILDCARD *</pattern><template>Thanks for testing!</template></category>
-	<category><pattern>TEST SR TAG</pattern><template><sr/></template></category>
-	<category><pattern>TEST SR IN RANDOM</pattern><template><random><li><sr/></li><li><srai>WHAT IS YOUR NAME</srai></li></random></template></category>
+    <category><pattern>TEST SRAI IN RANDOM</pattern><template><random><li><srai>WHAT IS YOUR NAME</srai></li><li><srai>WHAT IS MY NAME</srai></li></random></template></category>
+    <category><pattern>TEST WILDCARD *</pattern><template>Thanks for testing!</template></category>
+    <category><pattern>TEST SR TAG</pattern><template><sr/></template></category>
+    <category><pattern>TEST SR IN RANDOM</pattern><template><random><li><sr/></li><li><srai>WHAT IS YOUR NAME</srai></li></random></template></category>
     <category><pattern>TEST THE STAR TAG</pattern><template><star/></template></category>
     <category><pattern>TEST THE THAT TAG</pattern><template>I start testing that.</template></category>
     <category><pattern>TEST THAT-TAG. MATCH</pattern><that>I start testing that.</that><template>That matched quite well!</template></category>
@@ -25,5 +24,4 @@
     <category><pattern>WHAT DO YOU KNOW ABOUT ME</pattern><template>Your name is <get name='clientName'/> and you are <get name='clientAge'/></template></category>
     <category><pattern>TEST CONDITION AND SRAI</pattern><template><condition name='state'><li value='happy'>Feeling happy! <srai>WHAT IS YOUR NAME</srai></li><li value='sad'>Feeling sad today <srai>WHAT IS MY NAME</srai></li><li>I don't feel anything <srai>HOW OLD AM I</srai></li></condition></template></category>
     <category><pattern>*</pattern><template>I found nothing.</template></category>
-    
 </aiml>

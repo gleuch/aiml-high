@@ -1,6 +1,6 @@
-AIMLHigh = require('./AIMLInterpreter');
+aimlHigh = require('./aiml-high');
 
-var interpret = new AIMLHigh({name:'BotInterpreter', age:'42'});
+var interpret = new aimlHigh({name:'WireInterpreter', age:'42'});
 interpret.loadFiles(['./test.aiml.xml']);
 
 var callback = function(answer, wildCardArray, input){
