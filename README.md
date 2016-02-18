@@ -73,5 +73,7 @@ interpreter.findAnswer('What is my name?', callback);
 
 ## Copyright & License
 
+Based on previous work by [b3nra](https://www.npmjs.com/~b3nra).
+
 Copyright 2016 [Greg Leuch](https://gleu.ch) & [betaworks](https://betaworks.com).
 Released under [MIT License](https://opensource.org/licenses/MIT).
