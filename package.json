@@ -1,73 +1,32 @@
 {
-  "READ ME": "README.md",
-  "_args": [
-    [
-      "aiml-high",
-      "/home/sergio/Documentos/PFG/SERGIOBOT"
-    ]
-  ],
-  "_from": "aiml-high@*",
-  "_id": "aiml-high@0.0.1",
-  "_inCache": true,
-  "_location": "/aiml-high",
-  "_npmUser": {
-    "email": "contact@gleu.ch",
-    "name": "gleuch"
-  },
-  "_npmVersion": "1.4.28",
-  "_phantomChildren": {},
-  "_requested": {
-    "name": "aiml-high",
-    "raw": "aiml-high",
-    "rawSpec": "",
-    "scope": null,
-    "spec": "*",
-    "type": "range"
-  },
-  "_requiredBy": [
-    "#USER"
-  ],
-  "author": {
-    "name": "gleuch"
-  },
-  "bugs": {
-    "url": "https://github.com/gleuch/aiml-high/issues"
-  },
-  "dependencies": {
-    "xmldom": "~0.1.0"
-  },
-  "description": "Module to interpret AIML files in node.js",
-  "devDependencies": {},
-  "directories": {},
-  "dist": {
-    "shasum": "",
-    "tarball": ""
-  },
-  "gitHead": "",
-  "homepage": "https://github.com/gleuch/aiml-high",
-  "installable": true,
-  "keywords": [
-    "ai",
-    "aiml",
-    "bot",
-    "interpreter"
-  ],
-  "license": "BSD",
-  "main": "aiml-high",
-  "maintainers": [
-    {
-      "name": "Greg Leuch",
-      "email": "contact@gleu.ch"
-    }
-  ],
   "name": "aiml-high",
-  "optionalDependencies": {},
+  "version": "0.0.1",
+  "description": "Interpret AIML files using node.",
+  "main": "aiml-high.js",
+  "dependencies": {
+    "xmldom": "^0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/gleuch/aiml-high.git"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "keywords": [
+    "aiml",
+    "ai",
+    "bot",
+    "chat"
+  ],
+  "author": "Greg Leuch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gleuch/aiml-high/issues"
   },
-  "version": "0.0.1"
+  "homepage": "https://github.com/gleuch/aiml-high",
+  "maintainers": [
+    "Greg Leuch <contact@gleu.ch>"
+  ],
 }
