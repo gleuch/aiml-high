@@ -146,6 +146,30 @@
     </template>
   </category>
   <category>
+    <pattern>DO UPPERCASE <set name="clientName">*</set></pattern>
+    <template>Hello <uppercase><get name="clientName" /></uppercase></template>
+  </category>
+  <category>
+    <pattern>DO LOWERCASE <set name="clientName">*</set></pattern>
+    <template>Hello <lowercase><get name="clientName" /></lowercase></template>
+  </category>
+  <category>
+    <pattern>DO FORMAL CASE <set name="clientName">*</set></pattern>
+    <template>Hello <formal><get name="clientName" /></formal></template>
+  </category>
+  <category>
+    <pattern>DO SENTENCE <set name="clientName">*</set></pattern>
+    <template><sentence><get name="clientName" /></sentence> is the best.</template>
+  </category>
+  <category>
+    <pattern>SUPPORT BR TAGS</pattern>
+    <template>This<br/>is<br/>a<br/>bot.</template>
+  </category>
+  <category>
+    <pattern>I LIKE GIFS</pattern>
+    <template>GIF this: <img src="GIF" /></template>
+  </category>
+  <category>
     <pattern>*</pattern>
     <template>I found nothing.</template>
   </category>

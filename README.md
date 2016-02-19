@@ -23,7 +23,7 @@ xmldom
 
 ## Description
 
-With `new aimlHigh(botAttributes)` one can create a new interpreter object. `botAttributes` is an JSON-Object that can contain attributes of the bot one wants to use in AIML files, e.g. `{name: "Bot", age:"42"}`.
+With `new aimlHigh(botAttributes)` one can create a new interpreter object. `botAttributes` is an JSON-Object that can contain attributes of the bot one wants to use in AIML files, e.g. `{name: "Bot", age:"42"}`. While continued messaging will store the previous answer for use with `<that>`, you can pass a previous answer like so: `new aimlHigh({}, 'last answer')`.
 
 This object has a function called `loadFiles(fileArray)` which receives an array of AIML files. This function loads the AIML file into memory. There is also a  `loadFromString(stringContent)` that can also be passed if AIML file has been saved into a string.
 
@@ -34,7 +34,7 @@ Furthermore, the object has a function called `findAnswer(clientInput, cb)` whic
 
 ```
 aimlHigh = require('./aiml-high');
-var interpreter = new aimlHigh({name:'Bot', age:'42'});
+var interpreter = new aimlHigh({name:'Bot', age:'42'}, 'Goodbye');
 interpreter.loadFiles(['./test.aiml.xml']);
 
 var callback = function(answer, wildCardArray, input){
@@ -47,27 +47,31 @@ interpreter.findAnswer('What is my name?', callback);
 ```
 
 
-##### Supported AIML tags:
+##### Supported AIML v1.1 tags:
 
 ```
-<bot name="<i>NAME</i>"/>
-<get name="<i>NAME</i>"/>
-<set name="<i>NAME</i>">TEXT</set>
-<random><li><i>A</i></li><li><i>B</i></li><li><i>C</i></li></random>
-<srai><i>PATTERN TEXT</i></srai>
+<bot name="NAME"/>
+<get name="NAME"/>
+<set name="NAME">TEXT</set>
+<random><li>A</li><li>B</li><li>C</li></random>
+<srai>PATTERN TEXT</srai>
 <sr/>
 <star/>
-<that><i>TEXT</i></that>
-<condition name="<i>NAME</i>" value="<i>VALUE</i>"><i>TEXT</i></condition>
-<condition><li name="<i>NAME</i>" value="<i>VALUE</i>"><i>TEXT</i></li><li name="<i>NAME</i>" value="<i>VALUE</i>"><i>TEXT</i></li><li><i>TEXT</i></li></condition>
-<condition name="<i>NAME</i>"><li value="<i>VALUE</i>"><i>TEXT</i></li><li value="<i>VALUE</i>"><i>TEXT</i></li><li><i>TEXT</i></li></condition>
-<think><set name="<i>NAME</i>">TEXT</set></think>
-<anyElement/><random><li><i>A</i></li><li><i>B</i></li><li><i>C</i></li></random><anyElement/>
-<random><li><think><set name="<i>NAME</i>">TEXT</set></think></li><li><i>B</i></li></random>
-<random><li><srai><i>PATTERN TEXT</i></srai></li><li><i>B</i></li></random>
-<condition name="<i>NAME</i>" value="<i>VALUE</i>"><srai><i>PATTERN TEXT</i></srai></condition>
-<condition><li name="<i>NAME</i>" value="<i>VALUE</i>"><srai><i>PATTERN TEXT</i></srai></li><li name="<i>NAME</i>" value="<i>VALUE</i>"><i>TEXT</i></li></condition>
-<condition name="<i>NAME</i>"><li value="<i>VALUE</i>"><srai><i>PATTERN TEXT</i></srai></li><li value="<i>VALUE</i>"><i>TEXT</i></li></condition>
+<that>TEXT</that>
+<uppercase>TEXT</uppercase>
+<lowercase>TEXT</lowercase>
+<formal>PROPER NOUN</formal>
+<sentence>THIS IS A SENTENCE</sentence>
+<condition name="NAME" value="VALUE">TEXT</condition>
+<condition><li name="NAME" value="VALUE">TEXT</li><li name="NAME" value="VALUE">TEXT</li><li>TEXT</li></condition>
+<condition name="NAME"><li value="VALUE">TEXT</li><li value="VALUE">TEXT</li><li>TEXT</li></condition>
+<think><set name="NAME">TEXT</set></think>
+<anyElement/><random><li>A</li><li>B</li><li>C</li></random><anyElement/>
+<random><li><think><set name="NAME">TEXT</set></think></li><li>B</li></random>
+<random><li><srai>PATTERN TEXT</srai></li><li>B</li></random>
+<condition name="NAME" value="VALUE"><srai>PATTERN TEXT</srai></condition>
+<condition><li name="NAME" value="VALUE"><srai>PATTERN TEXT</srai></li><li name="NAME" value="VALUE">TEXT</li></condition>
+<condition name="NAME"><li value="VALUE"><srai>PATTERN TEXT</srai></li><li value="VALUE">TEXT</li></condition>
 ```
 
 

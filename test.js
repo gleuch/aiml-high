@@ -161,6 +161,30 @@ setTimeout(function() {
     'I found nothing.'
   ]));
 
+  // Case formatting
+  interpret.findAnswer('Do uppercase Greg Leuch', callback.bind([
+    'Hello GREG LEUCH'
+  ]));
+  interpret.findAnswer('Do lowercase Greg Leuch', callback.bind([
+    'Hello greg leuch'
+  ]));
+  interpret.findAnswer('Do formal case greg leuch', callback.bind([
+    'Hello Greg Leuch'
+  ]));
+  interpret.findAnswer('Do sentence greg the botmaster', callback.bind([
+    'Greg the botmaster is the best.'
+  ]));
+
+  // Allow non-formal tags
+  interpret.findAnswer("I like GIFs", callback.bind([
+    'GIF this: <img src="GIF"/>'
+  ]));
+
+  // Allow non-formal tags
+  interpret.findAnswer("Support BR tags", callback.bind([
+    'This\nis\na\nbot.'
+  ]));
+
   // Case insensitive testing
   interpret.findAnswer('You feel BAD', callback.bind([
     'I feel BAD!'

@@ -17,9 +17,12 @@ var previousAnswer = '';
 var previousThinkTag = false;
 
 //botAttributes contain things like name, age, master, gender...
-var aimlHigh = function(botAttributesParam){
+var aimlHigh = function(botAttributesParam, lastAnswer){
     var self = this;
     botAttributes = botAttributesParam;
+    if(lastAnswer !== undefined){
+      previousAnswer = lastAnswer;
+    }
 
     this.loadFiles = function(files){
         files.forEach(function(file){
@@ -85,10 +88,9 @@ var aimlHigh = function(botAttributesParam){
 
 // remove string control characters (like line-breaks '\r\n', leading / trailing spaces etc.)
 var cleanStringFormatCharacters = function(str){
-    var cleanedStr = str.replace(/(\r)?\n/gi, '');
+    var cleanedStr = str.replace(/\r\n/gi, '');
     cleanedStr = cleanedStr.replace(/^\s*/, '');
     cleanedStr = cleanedStr.replace(/\s*$/,'');
-
     return cleanedStr;
 }
 
@@ -171,10 +173,11 @@ var findCorrectCategory = function(clientInput, domCategories){
 
         for(var i = 0; i < patternChildNodes.length; i++){
             if(patternChildNodes[i].tagName === 'bot'){
-                text = text + botAttributes[patternChildNodes[i].getAttribute('name')];
+                // console.log(patternChildNodes[i].getAttribute('name'),botAttributes)
+                text = text + (botAttributes[patternChildNodes[i].getAttribute('name')] || '').toUpperCase();
             }
             else if(patternChildNodes[i].tagName === 'get'){
-                text = text + storedVariableValues[patternChildNodes[i].getAttribute('name')];
+                text = text + (storedVariableValues[patternChildNodes[i].getAttribute('name')] || '').toUpperCase();
             }
             else if(patternChildNodes[i].tagName === 'set'){
                 text = text + patternChildNodes[i].childNodes[0].nodeValue;
@@ -293,7 +296,8 @@ var findCorrectCategory = function(clientInput, domCategories){
                         text = text + aux;
                     }
                 }
-                else if(innerNodes[i].childNodes[0].nodeValue === '*'){
+                else if(innerNodes[i].childNodes[0].nodeValue === '*'
+                    || innerNodes[i].childNodes[0].nodeValue === '_'){
                     //the first set-Tag with wildCard gets the first wildCardValue, the second set-Tag with wildCard gets the second wildCardValue etc.
                     storedVariableValues[nameAttribute] = wildCardArray[indexOfSetTagAmountWithWildCard];
                     indexOfSetTagAmountWithWildCard++;
@@ -308,6 +312,23 @@ var findCorrectCategory = function(clientInput, domCategories){
                 }else{
                     text = text + resolveSpecialNodes(innerNodes[i].childNodes);
                 }
+            }
+            else if (innerNodes[i].tagName === 'uppercase') {
+              text = text + resolveSpecialNodes(innerNodes[i].childNodes).toUpperCase();
+              return text;
+            }
+            else if (innerNodes[i].tagName === 'lowercase') {
+              text = text + resolveSpecialNodes(innerNodes[i].childNodes).toLowerCase();
+            }
+            else if (innerNodes[i].tagName === 'sentence') {
+              var formalText = resolveSpecialNodes(innerNodes[i].childNodes);
+              text = text + formalText.charAt(0).toUpperCase() + formalText.slice(1);
+            }
+            else if (innerNodes[i].tagName === 'formal') {
+              var formalText = resolveSpecialNodes(innerNodes[i].childNodes);
+              text = text + formalText.split(' ').map(function(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+              }).join(' ');
             }
             else if(innerNodes[i].tagName === 'br'){
                 text = text + '\n';
@@ -331,9 +352,9 @@ var findCorrectCategory = function(clientInput, domCategories){
             }
             else if(innerNodes[i].tagName === 'random'){
                 //Get a random number and find the li tag chosen
-                var randomNumber = Math.floor(Math.random() * (innerNodes[i].childNodes.length));
+                var randomSeed = (function(s) {s = Math.sin(s) * 10000; return s - Math.floor(s);})(Math.random());
+                var randomNumber = Math.floor(randomSeed * (innerNodes[i].childNodes.length));
                 text = text + findFinalTextInTemplateNode([innerNodes[i].childNodes[randomNumber]]);
-            ;
             }
             else if(innerNodes[i].tagName === 'star'){
                 text = text + lastWildCardValue;
@@ -387,6 +408,9 @@ var findCorrectCategory = function(clientInput, domCategories){
                 //normal text (no special tag)
                 text = text + innerNodes[i].nodeValue;
             }
+            else {
+              text = text + innerNodes[i].toString()
+            }
         }
 
         text = cleanStringFormatCharacters(text);
@@ -436,14 +460,14 @@ var convertWildcardToRegex = function(text){
     //add a space before and after the pattern text (THIS IS LATER ALSO DONE FOR THE USER INPUT)
     //prevents false matchings
     //e.g. (HI as regex also matches HIM or HISTORY, but <space>HI</space> does only match <space>HI</space>)
-    if(firstCharacter != "*"){
+    if(firstCharacter != "*" && firstCharacter != "_"){
         var text = " " + text;
     }
     var lastCharacterPosition = text.length - 1;
     var lastCharacter = text.charAt(lastCharacterPosition);
 
     //replace space before wildcard
-    var modifiedText = text.replace(' *', '*');
+    var modifiedText = text.replace(' _', '*').replace(' *', '*');
     //replace wildcard (*) by regex
     modifiedText = modifiedText.replace(/\*/g, '[A-Z|0-9|\\s]*[A-Z|0-9|\*|-]*[A-Z|0-9]*[!|.|?|\\s]*');
 
